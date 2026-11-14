@@ -186,14 +186,23 @@ function onRestoreFile(e) {
     try { data = JSON.parse(reader.result); } catch { toast('That file is not a ChargeLog backup', 'warn'); return; }
     if (!data || data.app !== 'ChargeLog' || !Array.isArray(data.sessions)) { toast('That file is not a ChargeLog backup', 'warn'); return; }
     const sessions = data.sessions.filter(validSession);
+    const known = new Set(store.sessions.map((x) => x.id));
+    const fresh = sessions.filter((x) => !known.has(x.id));
+    const hasSettings = data.settings && Object.keys(data.settings).length > 0;
+    const actions = [];
+    if (fresh.length) actions.push({ label: `Add ${fresh.length} charge${fresh.length === 1 ? '' : 's'} to my data`, handler: () => {
+      store.data.sessions = store.sessions.concat(fresh);
+      store.save(); render(); toast(`Added ${fresh.length} charge${fresh.length === 1 ? '' : 's'}`);
+    } });
+    actions.push({ label: 'Replace everything', destructive: true, handler: () => {
+      store.data.sessions = sessions;
+      if (hasSettings) store.data.settings = { ...DEFAULTS, ...data.settings };
+      store.save(); render(); toast('Backup restored');
+    } });
     actionSheet({
-      title: `Restore ${sessions.length} charge${sessions.length === 1 ? '' : 's'}?`,
-      message: 'This replaces everything currently in ChargeLog.',
-      actions: [{ label: 'Replace with backup', destructive: true, handler: () => {
-        store.data.sessions = sessions;
-        store.data.settings = { ...DEFAULTS, ...(data.settings || {}) };
-        store.save(); render(); toast('Backup restored');
-      } }],
+      title: `Backup with ${sessions.length} charge${sessions.length === 1 ? '' : 's'}`,
+      message: fresh.length ? 'Add them to what you already have, or replace everything currently in ChargeLog.' : 'All of these charges are already in ChargeLog.',
+      actions,
     });
   };
   reader.readAsText(file);
