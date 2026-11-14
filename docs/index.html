@@ -1630,14 +1630,23 @@ function onRestoreFile(e) {
     try { data = JSON.parse(reader.result); } catch { toast('That file is not a ChargeLog backup', 'warn'); return; }
     if (!data || data.app !== 'ChargeLog' || !Array.isArray(data.sessions)) { toast('That file is not a ChargeLog backup', 'warn'); return; }
     const sessions = data.sessions.filter(validSession);
-    const known = new Set(store.sessions.map((x) => x.id));
-    const fresh = sessions.filter((x) => !known.has(x.id));
+    const byId = new Map(store.sessions.map((x) => [x.id, x]));
+    const fresh = sessions.filter((x) => !byId.has(x.id));
+    const updates = sessions.filter((x) => byId.has(x.id));
     const hasSettings = data.settings && Object.keys(data.settings).length > 0;
+    const plural = (n) => `${n} charge${n === 1 ? '' : 's'}`;
     const actions = [];
-    if (fresh.length) actions.push({ label: `Add ${fresh.length} charge${fresh.length === 1 ? '' : 's'} to my data`, handler: () => {
-      store.data.sessions = store.sessions.concat(fresh);
-      store.save(); render(); toast(`Added ${fresh.length} charge${fresh.length === 1 ? '' : 's'}`);
-    } });
+    if (sessions.length) {
+      const label = fresh.length && updates.length ? `Add ${fresh.length}, update ${plural(updates.length)}`
+        : fresh.length ? `Add ${plural(fresh.length)} to my data` : `Update ${plural(updates.length)}`;
+      actions.push({ label, handler: () => {
+        updates.forEach((x) => Object.assign(byId.get(x.id), x));
+        store.data.sessions = store.sessions.concat(fresh);
+        store.save(); render();
+        const msg = [fresh.length && `added ${fresh.length}`, updates.length && `updated ${updates.length}`].filter(Boolean).join(', ');
+        toast(msg.charAt(0).toUpperCase() + msg.slice(1) + ' charges');
+      } });
+    }
     actions.push({ label: 'Replace everything', destructive: true, handler: () => {
       store.data.sessions = sessions;
       if (hasSettings) store.data.settings = { ...DEFAULTS, ...data.settings };
@@ -1645,7 +1654,7 @@ function onRestoreFile(e) {
     } });
     actionSheet({
       title: `Backup with ${sessions.length} charge${sessions.length === 1 ? '' : 's'}`,
-      message: fresh.length ? 'Add them to what you already have, or replace everything currently in ChargeLog.' : 'All of these charges are already in ChargeLog.',
+      message: 'Add them to what you already have (charges you imported before get corrected), or replace everything currently in ChargeLog.',
       actions,
     });
   };
