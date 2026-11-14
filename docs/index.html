@@ -1,0 +1,1737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ChargeLog">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="format-detection" content="telephone=no">
+<title>ChargeLog</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<style>
+:root {
+  --brand: #21c78c;
+  --brand-deep: #0a789e;
+  --grad: linear-gradient(135deg, #26d18f 0%, #0a80a8 100%);
+  --bg: #f2f2f7;
+  --card: #ffffff;
+  --card2: #f2f2f7;
+  --text: #000000;
+  --text2: rgba(60, 60, 67, 0.6);
+  --text3: rgba(60, 60, 67, 0.3);
+  --fill: rgba(120, 120, 128, 0.14);
+  --fill2: rgba(120, 120, 128, 0.22);
+  --sep: rgba(60, 60, 67, 0.16);
+  --bar: rgba(249, 249, 249, 0.86);
+  --orange: #ff9500;
+  --red: #ff3b30;
+  --blue: #007aff;
+  --purple: #af52de;
+  --teal: #30b0c7;
+  --yellow: #ffcc00;
+  --sheet-bg: #f2f2f7;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
+  --rounded: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000000;
+    --card: #1c1c1e;
+    --card2: #2c2c2e;
+    --text: #ffffff;
+    --text2: rgba(235, 235, 245, 0.6);
+    --text3: rgba(235, 235, 245, 0.3);
+    --fill: rgba(120, 120, 128, 0.28);
+    --fill2: rgba(120, 120, 128, 0.4);
+    --sep: rgba(84, 84, 88, 0.55);
+    --bar: rgba(22, 22, 24, 0.86);
+    --sheet-bg: #1c1c1e;
+  }
+  .sheet .card, .sheet .group { background: #2c2c2e; }
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
+body {
+  font-family: var(--font);
+  font-size: 17px;
+  line-height: 1.3;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior-y: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+input, textarea, select { user-select: text; -webkit-user-select: text; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+svg { display: block; }
+.ico { width: 1em; height: 1em; display: inline-block; vertical-align: -0.125em; }
+
+/* ---------- Screens & tab bar ---------- */
+.screen { display: none; min-height: 100vh; padding: calc(var(--safe-top) + 12px) 16px calc(var(--safe-bottom) + 96px); }
+.screen.active { display: block; animation: fadeIn 0.18s ease; }
+@keyframes fadeIn { from { opacity: 0.4; } to { opacity: 1; } }
+.title-row { display: flex; align-items: flex-end; justify-content: space-between; margin: 8px 4px 16px; min-height: 44px; }
+.large-title { font-size: 34px; font-weight: 700; letter-spacing: 0.01em; margin: 0; }
+.icon-btn { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: var(--brand); font-size: 22px; }
+.icon-btn:active { opacity: 0.5; }
+
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+  display: flex; justify-content: space-around;
+  padding: 6px 4px calc(var(--safe-bottom) + 4px);
+  background: var(--bar);
+  backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-top: 0.5px solid var(--sep);
+}
+.tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; color: #999; font-size: 10px; font-weight: 500; padding: 2px 0; }
+.tab .ico { font-size: 25px; }
+.tab.active { color: var(--brand); }
+
+.stack { display: flex; flex-direction: column; gap: 18px; }
+
+/* ---------- Cards ---------- */
+.card { background: var(--card); border-radius: 22px; padding: 18px; }
+.card-title { font-size: 17px; font-weight: 600; margin: 0; }
+.row-between { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.muted { color: var(--text2); }
+.small { font-size: 13px; }
+.caption { font-size: 12px; color: var(--text2); }
+.rounded { font-family: var(--rounded); }
+.num { font-variant-numeric: tabular-nums; }
+.link-btn { color: var(--brand); font-weight: 600; font-size: 15px; }
+.link-btn:active { opacity: 0.5; }
+
+.primary-btn {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 16px; border-radius: 16px; background: var(--grad); color: #fff;
+  font-size: 17px; font-weight: 600; transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.primary-btn:active { transform: scale(0.97); opacity: 0.85; }
+.primary-btn:disabled { opacity: 0.45; transform: none; }
+
+/* Active charge card */
+.active-card { background: var(--grad); color: #fff; border-radius: 28px; padding: 20px; box-shadow: 0 12px 30px rgba(10, 120, 158, 0.35); display: flex; flex-direction: column; gap: 18px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,0.2); font-size: 15px; font-weight: 600; }
+.pulse { animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+.circle-btn { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.2); display: grid; place-items: center; font-size: 20px; }
+.active-main { display: flex; align-items: center; gap: 22px; }
+.ring-wrap { position: relative; width: 118px; height: 118px; flex: none; }
+.ring-wrap svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring-label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ring-pct { font-family: var(--rounded); font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.ring-sub { font-size: 11px; font-weight: 600; opacity: 0.85; }
+.ring-arc { transition: stroke-dashoffset 0.6s ease; }
+.kv-label { font-size: 12px; font-weight: 600; opacity: 0.8; }
+.kv-big { font-family: var(--rounded); font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.kv-mid { font-family: var(--rounded); font-size: 17px; font-weight: 600; }
+.glass-row { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,0.18); width: 100%; text-align: left; color: #fff; }
+.glass-row.due { background: rgba(255,255,255,0.32); }
+.glass-row:active { opacity: 0.7; }
+.white-btn { width: 100%; padding: 15px; border-radius: 16px; background: #fff; color: var(--brand-deep); font-weight: 600; font-size: 17px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.white-btn:active { transform: scale(0.97); }
+
+/* Idle card */
+.idle-card { background: var(--card); border-radius: 28px; padding: 22px; display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; }
+.idle-icon { position: relative; width: 104px; height: 104px; border-radius: 50%; background: rgba(33,199,140,0.12); display: grid; place-items: center; }
+.idle-icon::before { content: ""; position: absolute; width: 76px; height: 76px; border-radius: 50%; background: rgba(33,199,140,0.16); }
+.idle-icon .ico { position: relative; font-size: 40px; color: var(--brand); }
+.idle-title { font-size: 22px; font-weight: 700; margin: 0; }
+
+/* Month summary */
+.big-money { font-family: var(--rounded); font-size: 44px; font-weight: 700; margin: 10px 0 14px; font-variant-numeric: tabular-nums; }
+.mini-stats { display: flex; }
+.mini-stats > div { flex: 1; text-align: center; }
+.mini-stats > div + div { border-left: 0.5px solid var(--sep); }
+.mini-val { font-family: var(--rounded); font-weight: 700; font-size: 15px; }
+
+/* Session rows */
+.session-row { display: flex; align-items: center; gap: 14px; padding: 8px 0; width: 100%; text-align: left; }
+.session-ring { position: relative; width: 46px; height: 46px; flex: none; }
+.session-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.session-ring .day { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; }
+.session-ring .day b { font-family: var(--rounded); font-size: 16px; }
+.session-ring .day small { font-size: 8px; font-weight: 700; color: var(--text2); margin-top: 2px; }
+.session-mid { flex: 1; min-width: 0; }
+.session-pcts { font-weight: 600; font-size: 15px; font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 5px; }
+.session-pcts .ico { font-size: 11px; color: var(--text2); }
+.session-right { text-align: right; }
+.session-cost { font-family: var(--rounded); font-weight: 600; font-size: 17px; }
+.divider { height: 0.5px; background: var(--sep); margin-left: 60px; }
+
+/* History list */
+.month-head { display: flex; align-items: baseline; gap: 6px; margin: 6px 4px 8px; }
+.month-head .name { font-size: 20px; font-weight: 700; flex: 1; }
+.month-head .tot { font-weight: 700; color: var(--brand); font-size: 15px; }
+.group { background: var(--card); border-radius: 14px; overflow: hidden; }
+.swipe { position: relative; overflow: hidden; }
+.swipe + .swipe::before { content: ""; position: absolute; top: 0; left: 76px; right: 0; height: 0.5px; background: var(--sep); z-index: 2; }
+.swipe-content { position: relative; z-index: 1; background: var(--card); padding: 4px 16px; transition: transform 0.25s ease; }
+.swipe-del { position: absolute; top: 0; right: 0; bottom: 0; width: 88px; background: var(--red); color: #fff; font-weight: 600; font-size: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+
+.empty { text-align: center; padding: 70px 30px; color: var(--text2); }
+.empty .ico { font-size: 52px; color: var(--text3); margin-bottom: 14px; }
+.empty h3 { color: var(--text); font-size: 22px; margin: 0 0 6px; }
+
+/* ---------- Forms (grouped lists) ---------- */
+.section { margin-bottom: 22px; }
+.section-head { font-size: 13px; text-transform: uppercase; color: var(--text2); margin: 0 16px 7px; letter-spacing: 0.02em; }
+.section-foot { font-size: 13px; color: var(--text2); margin: 7px 16px 0; line-height: 1.35; white-space: pre-line; }
+.section .group { border-radius: 12px; }
+.item { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 46px; padding: 10px 16px; position: relative; }
+.item + .item::before, .item + .block::before, .block + .item::before, .block + .block::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; height: 0.5px; background: var(--sep); }
+.block { padding: 14px 16px; position: relative; }
+.item-label { display: flex; align-items: center; gap: 12px; }
+.item-value { color: var(--text2); text-align: right; font-variant-numeric: tabular-nums; }
+.item.button { color: var(--brand); width: 100%; text-align: left; }
+.item.button.destructive { color: var(--red); justify-content: center; }
+.item.button:active { background: var(--fill); }
+.app-icon { width: 29px; height: 29px; border-radius: 7px; display: grid; place-items: center; color: #fff; font-size: 16px; flex: none; }
+
+.field { display: flex; align-items: center; gap: 4px; }
+.field input {
+  width: 110px; text-align: right; border: 0; background: transparent; color: var(--text);
+  font: inherit; font-variant-numeric: tabular-nums; padding: 4px 0; outline: none;
+}
+.field .unit { color: var(--text2); }
+input[type="datetime-local"], input[type="time"], select {
+  font: inherit; color: var(--brand); background: var(--fill); border: 0; border-radius: 8px; padding: 6px 10px; outline: none;
+  -webkit-appearance: none; appearance: none;
+}
+select { padding-right: 26px; background-image: linear-gradient(45deg, transparent 50%, var(--text2) 50%), linear-gradient(135deg, var(--text2) 50%, transparent 50%); background-position: calc(100% - 13px) 55%, calc(100% - 8px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
+textarea { width: 100%; min-height: 60px; border: 0; background: transparent; color: var(--text); font: inherit; resize: none; outline: none; }
+
+/* Toggle */
+.switch { position: relative; width: 51px; height: 31px; flex: none; }
+.switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+.switch span { position: absolute; inset: 0; border-radius: 999px; background: var(--fill2); transition: background 0.2s; }
+.switch span::after { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; box-shadow: 0 3px 8px rgba(0,0,0,0.15), 0 1px 1px rgba(0,0,0,0.16); transition: transform 0.22s ease; }
+.switch input:checked + span { background: var(--brand); }
+.switch input:checked + span::after { transform: translateX(20px); }
+
+/* Segmented */
+.segmented { display: flex; background: var(--fill); border-radius: 9px; padding: 2px; position: relative; }
+.segmented button { flex: 1; padding: 6px 10px; font-size: 13px; font-weight: 500; border-radius: 7px; position: relative; z-index: 1; transition: background 0.2s; white-space: nowrap; }
+.segmented button.on { background: var(--card); box-shadow: 0 3px 8px rgba(0,0,0,0.12), 0 1px 1px rgba(0,0,0,0.04); font-weight: 600; }
+@media (prefers-color-scheme: dark) { .segmented button.on { background: #636366; } }
+
+/* Chips */
+.chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px 0; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { padding: 8px 14px; border-radius: 999px; background: var(--fill); font-size: 15px; font-weight: 600; flex: none; }
+.chip.on { background: var(--brand); color: #fff; }
+
+/* Percent input */
+.pct-display { display: flex; align-items: baseline; justify-content: center; gap: 2px; }
+.pct-num { font-family: var(--rounded); font-size: 76px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.05; }
+.pct-sign { font-family: var(--rounded); font-size: 32px; font-weight: 600; color: var(--text2); }
+.battery-bar { height: 10px; border-radius: 999px; background: var(--fill); overflow: hidden; margin: 12px 0 16px; }
+.battery-fill { height: 100%; border-radius: 999px; transition: width 0.2s ease, background 0.2s; }
+.pct-controls { display: flex; align-items: center; gap: 14px; }
+.round-btn { width: 42px; height: 42px; border-radius: 50%; background: var(--fill); display: grid; place-items: center; font-size: 22px; flex: none; touch-action: manipulation; }
+.round-btn:active { background: var(--fill2); }
+
+input[type="range"] {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 999px; outline: none; margin: 0;
+  background: linear-gradient(to right, var(--brand) 0%, var(--brand) var(--p, 50%), var(--fill2) var(--p, 50%), var(--fill2) 100%);
+}
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%; background: #fff; box-shadow: 0 3px 8px rgba(0,0,0,0.18), 0 0 0 0.5px rgba(0,0,0,0.06); }
+input[type="range"]::-moz-range-thumb { width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 0; box-shadow: 0 3px 8px rgba(0,0,0,0.18); }
+
+/* Results */
+.result-cols { display: flex; }
+.result-cols > div { flex: 1; text-align: center; }
+.result-cols > div + div { border-left: 0.5px solid var(--sep); }
+.result-val { font-family: var(--rounded); font-size: 18px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.formula { font-size: 12px; color: var(--text2); font-variant-numeric: tabular-nums; line-height: 1.5; }
+
+/* ---------- Sheets ---------- */
+.backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 50; opacity: 0; transition: opacity 0.3s ease; }
+.backdrop.show { opacity: 1; }
+.sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 51;
+  top: calc(var(--safe-top) + 12px);
+  background: var(--sheet-bg); border-radius: 14px 14px 0 0;
+  display: flex; flex-direction: column;
+  transform: translateY(100%); transition: transform 0.38s cubic-bezier(0.2, 0.9, 0.25, 1);
+  max-width: 700px; margin: 0 auto;
+}
+.sheet.medium { top: auto; max-height: 82vh; }
+.sheet.show { transform: translateY(0); }
+.sheet-grabber { width: 36px; height: 5px; border-radius: 3px; background: var(--text3); margin: 6px auto 0; flex: none; }
+.sheet-head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 8px 16px 10px; flex: none; }
+.sheet-head h2 { font-size: 17px; font-weight: 600; margin: 0; text-align: center; }
+.sheet-head .left { justify-self: start; color: var(--brand); }
+.sheet-head .right { justify-self: end; color: var(--brand); font-weight: 600; }
+.sheet-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 8px 16px 24px; overscroll-behavior: contain; }
+.sheet-foot { flex: none; padding: 8px 16px calc(var(--safe-bottom) + 10px); background: var(--bar); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 0.5px solid var(--sep); }
+.sheet .card { background: var(--card); }
+
+/* Action sheet */
+.action-sheet { position: fixed; left: 8px; right: 8px; bottom: calc(var(--safe-bottom) + 8px); z-index: 61; transform: translateY(120%); transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.25, 1); max-width: 560px; margin: 0 auto; }
+.action-sheet.show { transform: translateY(0); }
+.action-group { background: var(--bar); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border-radius: 14px; overflow: hidden; margin-bottom: 8px; }
+.action-group .msg { padding: 14px 16px; text-align: center; font-size: 13px; color: var(--text2); border-bottom: 0.5px solid var(--sep); }
+.action-group .msg b { display: block; font-size: 13px; margin-bottom: 2px; }
+.action-group button { width: 100%; padding: 17px; font-size: 20px; color: var(--blue); }
+.action-group button + button { border-top: 0.5px solid var(--sep); }
+.action-group button.destructive { color: var(--red); }
+.action-group button.cancel { font-weight: 600; }
+.action-sheet .cancel-group { background: var(--card); }
+
+/* Toast */
+.toast { position: fixed; left: 50%; top: calc(var(--safe-top) + 10px); transform: translate(-50%, -150%); z-index: 80; background: var(--card); color: var(--text); padding: 12px 18px; border-radius: 999px; box-shadow: 0 8px 30px rgba(0,0,0,0.18); font-size: 15px; font-weight: 600; transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.25, 1); display: flex; gap: 8px; align-items: center; max-width: calc(100% - 32px); }
+.toast.show { transform: translate(-50%, 0); }
+.toast .ico { color: var(--brand); flex: none; }
+
+/* Banner */
+.banner { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 18px; background: rgba(255, 149, 0, 0.13); }
+.banner.info { background: rgba(33, 199, 140, 0.13); }
+.banner .ico { font-size: 22px; color: var(--orange); flex: none; margin-top: 1px; }
+.banner.info .ico { color: var(--brand); }
+.banner b { display: block; font-size: 15px; }
+
+/* Stats */
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tile { background: var(--card); border-radius: 22px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.tile-icon { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; font-size: 16px; }
+.tile-val { font-family: var(--rounded); font-size: 20px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+.chart { width: 100%; overflow: visible; }
+.chart text { font-family: var(--font); font-size: 11px; fill: var(--text2); }
+.chart .grid { stroke: var(--sep); stroke-dasharray: 2 3; stroke-width: 0.6; }
+.chart .avg { stroke: var(--text2); stroke-dasharray: 4 4; stroke-width: 1; }
+.chart .bar { transition: opacity 0.2s; }
+.stat-head-val { font-family: var(--rounded); font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.steps { margin: 0; padding-left: 20px; font-size: 15px; line-height: 1.5; }
+.steps li { margin-bottom: 8px; }
+.steps code { background: var(--fill); padding: 1px 6px; border-radius: 5px; font-size: 14px; }
+.hidden { display: none !important; }
+
+</style>
+</head>
+<body>
+<main>
+  <section class="screen" id="screen-charge"></section>
+  <section class="screen" id="screen-history"></section>
+  <section class="screen" id="screen-stats"></section>
+  <section class="screen" id="screen-settings"></section>
+</main>
+<nav class="tabbar" id="tabbar"></nav>
+<script>
+'use strict';
+
+/* =========================================================
+   ChargeLog web — core: storage, maths, formatting, icons
+   ========================================================= */
+
+const APP_VERSION = '1.0';
+const STORAGE_KEY = 'chargelog.v1';
+
+const DEFAULTS = {
+  capacity: 44,        // kWh
+  lossPct: 20,         // cable / heat loss %
+  price: 0.15,         // € per kWh before IVA
+  vatPct: 23,          // IVA %
+  power: 2.3,          // charger kW (estimates only)
+  target: 80,          // estimate target %
+  lastStart: 30,
+  reminder: 'shortcut',            // 'shortcut' | 'calendar' | 'app'
+  shortcutName: 'ChargeLog Reminder',
+  installHintDismissed: false,
+};
+
+const store = {
+  data: { sessions: [], settings: { ...DEFAULTS } },
+  load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        this.data.sessions = Array.isArray(parsed.sessions) ? parsed.sessions : [];
+        this.data.settings = { ...DEFAULTS, ...(parsed.settings || {}) };
+      }
+    } catch (e) { console.warn('Could not load data', e); }
+  },
+  save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(this.data)); }
+    catch (e) { console.warn('Could not save data', e); toast('Could not save — storage is full or blocked', 'warn'); }
+  },
+  get settings() { return this.data.settings; },
+  get sessions() { return this.data.sessions; },
+};
+
+/* ---------- Maths: your formula ---------- */
+// kWh = consumption(%) × capacity × cable loss
+// €   = kWh × price × IVA
+function tariffNow() {
+  const s = store.settings;
+  return { cap: +s.capacity, loss: 1 + s.lossPct / 100, price: +s.price, vat: 1 + s.vatPct / 100 };
+}
+const energyFor = (t, pct) => (pct / 100) * t.cap * t.loss;
+const costFor = (t, pct) => energyFor(t, pct) * t.price * t.vat;
+
+const tariffOf = (s) => ({ cap: s.cap, loss: s.loss, price: s.price, vat: s.vat });
+const isActive = (s) => s.end == null;
+const addedPct = (s) => Math.max(0, (s.endPct ?? s.startPct) - s.startPct);
+const sEnergy = (s) => energyFor(tariffOf(s), addedPct(s));
+const sCost = (s) => costFor(tariffOf(s), addedPct(s));
+const sDuration = (s) => (s.end ?? Date.now()) - s.start;
+
+const activeSession = () => store.sessions.find(isActive) || null;
+const completedSessions = () => store.sessions.filter((s) => !isActive(s)).sort((a, b) => b.start - a.start);
+
+function estimateMs(t, fromPct, toPct, powerKw) {
+  const pct = toPct - fromPct;
+  if (powerKw <= 0 || pct <= 0) return null;
+  return (energyFor(t, pct) / powerKw) * 3600 * 1000;
+}
+
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
+
+/* ---------- Formatting ---------- */
+const LOCALE = navigator.language || 'pt-PT';      // numbers & currency
+const DATE_LOCALE = 'en-GB';                         // dates & times (UI language)
+const eurFmt = new Intl.NumberFormat(LOCALE, { style: 'currency', currency: 'EUR' });
+const kwhFmt = new Intl.NumberFormat(LOCALE, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const fmt = {
+  eur: (v) => eurFmt.format(v || 0),
+  kwh: (v) => kwhFmt.format(v || 0) + ' kWh',
+  num: (v, d = 2) => new Intl.NumberFormat(LOCALE, { maximumFractionDigits: d }).format(v || 0),
+  pct: (v) => Math.round(v) + '%',
+  dur(ms) {
+    const m = Math.round(Math.max(0, ms) / 60000);
+    if (m < 1) return '<1m';
+    const h = Math.floor(m / 60), mm = m % 60;
+    return h ? (mm ? `${h}h ${mm}m` : `${h}h`) : `${mm}m`;
+  },
+  timer(ms) {
+    const s = Math.max(0, Math.floor(ms / 1000));
+    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    const p = (n) => String(n).padStart(2, '0');
+    return h ? `${h}:${p(m)}:${p(sec)}` : `${m}:${p(sec)}`;
+  },
+  time: (d) => new Date(d).toLocaleTimeString(DATE_LOCALE, { hour: '2-digit', minute: '2-digit' }),
+  dayKey: (d) => { const x = new Date(d); return `${x.getFullYear()}-${x.getMonth()}-${x.getDate()}`; },
+  clock(d) {
+    const date = new Date(d), now = new Date();
+    const tomorrow = new Date(now); tomorrow.setDate(now.getDate() + 1);
+    const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+    const k = fmt.dayKey(date);
+    if (k === fmt.dayKey(now)) return fmt.time(date);
+    if (k === fmt.dayKey(tomorrow)) return 'tomorrow ' + fmt.time(date);
+    if (k === fmt.dayKey(yesterday)) return 'yesterday ' + fmt.time(date);
+    return date.toLocaleDateString(DATE_LOCALE, { day: 'numeric', month: 'short' }) + ' ' + fmt.time(date);
+  },
+  clockAt(d) {
+    const c = fmt.clock(d);
+    return /^\d/.test(c) ? 'at ' + c : c.replace(/ (\d{1,2}:\d{2})$/, ' at $1');
+  },
+  month(d) {
+    const s = new Date(d).toLocaleDateString(DATE_LOCALE, { month: 'long', year: 'numeric' });
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  },
+  monthNarrow: (d) => new Date(d).toLocaleDateString(DATE_LOCALE, { month: 'narrow' }).toUpperCase(),
+  weekdayShort: (d) => new Date(d).toLocaleDateString(DATE_LOCALE, { weekday: 'short' }).replace('.', '').toUpperCase(),
+  relative(ms) {
+    if (ms <= 0) return 'now';
+    return 'in ' + fmt.dur(ms);
+  },
+};
+
+function parseNum(str) {
+  if (typeof str === 'number') return str;
+  const v = parseFloat(String(str).replace(/\s/g, '').replace(',', '.'));
+  return Number.isFinite(v) ? v : NaN;
+}
+
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function startOfMonth(d) { const x = new Date(d); return new Date(x.getFullYear(), x.getMonth(), 1).getTime(); }
+function addMonths(ts, n) { const x = new Date(ts); return new Date(x.getFullYear(), x.getMonth() + n, 1).getTime(); }
+function toLocalInput(ts) {
+  const d = new Date(ts), p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function fromLocalInput(v) { const t = new Date(v).getTime(); return Number.isFinite(t) ? t : null; }
+
+/* ---------- Icons (simple line icons) ---------- */
+const I = (body, fill = false) =>
+  `<svg class="ico" viewBox="0 0 24 24" fill="${fill ? 'currentColor' : 'none'}" stroke="${fill ? 'none' : 'currentColor'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+const ICON = {
+  bolt: I('<path d="M13.5 2 4.5 13.5h6.5L9.5 22l10-12h-6.6L13.5 2z"/>', true),
+  car: I('<path d="M5 16.5V12l2-5.2A2 2 0 0 1 8.9 5.5h6.2a2 2 0 0 1 1.9 1.3L19 12v4.5"/><path d="M3.5 16.5h17v2.2a1 1 0 0 1-1 1H18a1 1 0 0 1-1-1v-.7H7v.7a1 1 0 0 1-1 1H4.5a1 1 0 0 1-1-1z"/><path d="M5 12h14"/><circle cx="7.5" cy="14.3" r=".6"/><circle cx="16.5" cy="14.3" r=".6"/>'),
+  list: I('<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.2" fill="currentColor"/><circle cx="4.5" cy="12" r="1.2" fill="currentColor"/><circle cx="4.5" cy="18" r="1.2" fill="currentColor"/>'),
+  chart: I('<path d="M4 20h16"/><rect x="5.5" y="11" width="3" height="6.5" rx="1"/><rect x="10.5" y="6" width="3" height="11.5" rx="1"/><rect x="15.5" y="9" width="3" height="8.5" rx="1"/>'),
+  sliders: I('<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/>'),
+  bell: I('<path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/>'),
+  bellOff: I('<path d="M8.6 5.6A6 6 0 0 1 18 11v4M6 11v5l-1.5 2H17"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/><path d="M3 3l18 18"/>'),
+  flag: I('<path d="M5 21V4"/><path d="M5 4h12l-2.5 4L17 12H5"/>'),
+  chevron: I('<path d="M9 5l7 7-7 7"/>'),
+  arrow: I('<path d="M4 12h15M13 6l6 6-6 6"/>'),
+  plus: I('<path d="M12 5v14M5 12h14"/>'),
+  minus: I('<path d="M5 12h14"/>'),
+  dots: I('<circle cx="5.5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="18.5" cy="12" r="1.6" fill="currentColor"/>'),
+  share: I('<path d="M12 3v12M7.5 7.5 12 3l4.5 4.5"/><path d="M6 11H5v9h14v-9h-1"/>'),
+  trash: I('<path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13"/>'),
+  check: I('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
+  clock: I('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'),
+  wand: I('<path d="M4 20 15 9M14 4v3M12.5 5.5h3M19 9v3M17.5 10.5h3M18 3.5l.7.7"/>'),
+  euro: I('<circle cx="12" cy="12" r="9"/><path d="M15.5 8.6a4 4 0 1 0 0 6.8M7 11h6M7 13h6"/>'),
+  battery: I('<rect x="3" y="7" width="16" height="10" rx="2.5"/><path d="M21.5 10.5v3"/><path d="M11.5 9 9 12.3h3.3L10 15.5" stroke-width="1.6"/>'),
+  hash: I('<path d="M9 4 7.5 20M16.5 4 15 20M4.5 9h16M3.5 15h16"/>'),
+  divide: I('<circle cx="12" cy="6.5" r="1.2" fill="currentColor"/><circle cx="12" cy="17.5" r="1.2" fill="currentColor"/><path d="M5 12h14"/>'),
+  warn: I('<path d="M12 4 2.8 19.5h18.4z"/><path d="M12 10v4.2M12 17h.01"/>'),
+  info: I('<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8h.01"/>'),
+  download: I('<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5"/><path d="M5 19.5h14"/>'),
+  upload: I('<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M5 19.5h14"/>'),
+  repeat: I('<path d="M4 11V9a3 3 0 0 1 3-3h12M16 3l3 3-3 3"/><path d="M20 13v2a3 3 0 0 1-3 3H5M8 21l-3-3 3-3"/>'),
+  calendar: I('<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>'),
+  plug: I('<path d="M9 3v5M15 3v5M6.5 8h11v3a5.5 5.5 0 0 1-11 0z"/><path d="M12 16.5V21"/>'),
+};
+
+/* ---------- Small UI primitives ---------- */
+function h(html) { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; }
+
+let toastTimer = null;
+function toast(msg, kind = 'ok') {
+  let el = document.getElementById('toast');
+  if (!el) { el = h('<div id="toast" class="toast"></div>'); document.body.appendChild(el); }
+  el.innerHTML = (kind === 'warn' ? ICON.warn.replace('class="ico"', 'class="ico" style="color:var(--orange)"') : ICON.check) + `<span>${esc(msg)}</span>`;
+  requestAnimationFrame(() => el.classList.add('show'));
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+}
+
+/** iOS-style bottom sheet. Returns { el, body, close }. */
+function openSheet({ title, left = 'Cancel', right = null, onRight = null, medium = false, footer = null, onClose = null }) {
+  const backdrop = h('<div class="backdrop"></div>');
+  const sheet = h(`
+    <div class="sheet${medium ? ' medium' : ''}" role="dialog" aria-modal="true">
+      <div class="sheet-grabber"></div>
+      <div class="sheet-head">
+        <button class="left">${esc(left)}</button>
+        <h2>${esc(title)}</h2>
+        ${right ? `<button class="right">${esc(right)}</button>` : '<span></span>'}
+      </div>
+      <div class="sheet-body"></div>
+      ${footer ? '<div class="sheet-foot"></div>' : ''}
+    </div>`);
+  document.body.append(backdrop, sheet);
+  document.body.style.overflow = 'hidden';
+  requestAnimationFrame(() => { backdrop.classList.add('show'); sheet.classList.add('show'); });
+
+  let closed = false;
+  function close() {
+    if (closed) return; closed = true;
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    backdrop.classList.remove('show'); sheet.classList.remove('show');
+    setTimeout(() => { backdrop.remove(); sheet.remove(); if (!document.querySelector('.sheet')) document.body.style.overflow = ''; }, 380);
+    onClose && onClose();
+  }
+  backdrop.addEventListener('click', close);
+  sheet.querySelector('.left').addEventListener('click', close);
+  if (right) sheet.querySelector('.right').addEventListener('click', () => onRight && onRight(close));
+
+  // Drag the grabber/header down to dismiss
+  const head = sheet.querySelector('.sheet-head'), grab = sheet.querySelector('.sheet-grabber');
+  let startY = null, dy = 0;
+  const onStart = (e) => { if (e.target.closest('button')) return; startY = e.touches[0].clientY; dy = 0; sheet.style.transition = 'none'; };
+  const onMove = (e) => { if (startY == null) return; dy = Math.max(0, e.touches[0].clientY - startY); sheet.style.transform = `translateY(${dy}px)`; };
+  const onEnd = () => { if (startY == null) return; sheet.style.transition = ''; sheet.style.transform = ''; if (dy > 110) close(); startY = null; };
+  [head, grab].forEach((el) => { el.addEventListener('touchstart', onStart, { passive: true }); el.addEventListener('touchmove', onMove, { passive: true }); el.addEventListener('touchend', onEnd); });
+
+  return { el: sheet, body: sheet.querySelector('.sheet-body'), foot: sheet.querySelector('.sheet-foot'), close };
+}
+
+/** iOS-style action sheet. actions: [{ label, destructive, handler }] */
+function actionSheet({ title = '', message = '', actions = [] }) {
+  const backdrop = h('<div class="backdrop" style="z-index:60"></div>');
+  const el = h(`
+    <div class="action-sheet">
+      <div class="action-group">
+        ${title || message ? `<div class="msg">${title ? `<b>${esc(title)}</b>` : ''}${esc(message)}</div>` : ''}
+        ${actions.map((a, i) => `<button data-i="${i}" class="${a.destructive ? 'destructive' : ''}">${esc(a.label)}</button>`).join('')}
+      </div>
+      <div class="action-group cancel-group"><button class="cancel">Cancel</button></div>
+    </div>`);
+  document.body.append(backdrop, el);
+  requestAnimationFrame(() => { backdrop.classList.add('show'); el.classList.add('show'); });
+  const close = () => { backdrop.classList.remove('show'); el.classList.remove('show'); setTimeout(() => { backdrop.remove(); el.remove(); }, 320); };
+  backdrop.addEventListener('click', close);
+  el.querySelector('.cancel').addEventListener('click', close);
+  el.querySelectorAll('[data-i]').forEach((b) => b.addEventListener('click', () => { close(); actions[+b.dataset.i].handler(); }));
+}
+
+function ringSVG({ from = 0, to, stroke = 12, track = 'rgba(255,255,255,0.25)', color = '#fff', size = 100 }) {
+  const r = (size - stroke) / 2, c = 2 * Math.PI * r;
+  const a = clamp(from / 100, 0, 1), b = Math.max(a + 0.005, clamp(to / 100, 0, 1));
+  const len = (b - a) * c;
+  return `<svg viewBox="0 0 ${size} ${size}">
+    <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${track}" stroke-width="${stroke}"/>
+    <circle class="ring-arc" cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}"
+      stroke-linecap="round" stroke-dasharray="${len} ${c}" stroke-dashoffset="${-a * c}"/>
+  </svg>`;
+}
+
+function batteryColor(p) { return p < 20 ? 'var(--red)' : p < 40 ? 'var(--orange)' : 'var(--brand)'; }
+
+/** Big % picker: number, battery bar, − slider +. */
+function PercentInput(container, { value, min = 0, max = 100, onChange }) {
+  container.innerHTML = `
+    <div class="pct-display"><span class="pct-num num"></span><span class="pct-sign">%</span></div>
+    <div class="battery-bar"><div class="battery-fill"></div></div>
+    <div class="pct-controls">
+      <button class="round-btn" data-d="-1" aria-label="Minus 1">${ICON.minus}</button>
+      <input type="range" step="1" aria-label="Battery percentage">
+      <button class="round-btn" data-d="1" aria-label="Plus 1">${ICON.plus}</button>
+    </div>`;
+  const num = container.querySelector('.pct-num'), fill = container.querySelector('.battery-fill'), range = container.querySelector('input');
+  let v = value, lo = min, hi = max;
+  function paint() {
+    num.textContent = Math.round(v);
+    fill.style.width = clamp(v, 0, 100) + '%';
+    fill.style.background = batteryColor(v);
+    range.min = lo; range.max = hi; range.value = v;
+    range.style.setProperty('--p', ((v - lo) / Math.max(1, hi - lo)) * 100 + '%');
+  }
+  function set(nv, notify = true) {
+    const c = clamp(Math.round(nv), lo, hi);
+    if (c !== v) { v = c; if (navigator.vibrate) navigator.vibrate(4); }
+    paint(); if (notify && onChange) onChange(v);
+  }
+  range.addEventListener('input', () => set(+range.value));
+  container.querySelectorAll('.round-btn').forEach((btn) => {
+    let t1 = null, t2 = null;
+    const d = +btn.dataset.d;
+    const stop = () => { clearTimeout(t1); clearInterval(t2); t1 = t2 = null; };
+    btn.addEventListener('pointerdown', (e) => {
+      e.preventDefault(); set(v + d);
+      t1 = setTimeout(() => { t2 = setInterval(() => set(v + d), 70); }, 380);
+    });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => btn.addEventListener(ev, stop));
+    btn.addEventListener('contextmenu', (e) => e.preventDefault());
+  });
+  v = clamp(value, lo, hi); paint();
+  return {
+    get value() { return v; },
+    set(nv) { set(nv); },
+    setRange(nlo, nhi) { lo = nlo; hi = nhi; set(v); },
+  };
+}
+
+function toggleHTML(id, checked) {
+  return `<label class="switch"><input type="checkbox" id="${id}" ${checked ? 'checked' : ''}><span></span></label>`;
+}
+function segmentedHTML(name, options, current) {
+  return `<div class="segmented" data-seg="${name}">${options.map(([val, label]) => `<button data-val="${esc(val)}" class="${val === current ? 'on' : ''}">${esc(label)}</button>`).join('')}</div>`;
+}
+function wireSegmented(root, name, onChange) {
+  const seg = root.querySelector(`[data-seg="${name}"]`);
+  seg.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
+    seg.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b));
+    onChange(b.dataset.val);
+  }));
+}
+const DECIMAL_SEP = (1.1).toLocaleString(LOCALE).charAt(1) || '.';
+function numberField(id, value, unit) {
+  const shown = String(+(+value).toFixed(4)).replace('.', DECIMAL_SEP);
+  return `<div class="field"><input id="${id}" inputmode="decimal" enterkeyhint="done" autocomplete="off" value="${esc(shown)}"><span class="unit">${esc(unit)}</span></div>`;
+}
+
+/* =========================================================
+   Reminders: picker UI + delivery to iOS Reminders / Calendar
+   ========================================================= */
+
+const PRESET_HOURS = [1, 2, 3, 4, 5, 6, 8, 10];
+
+/**
+ * Reminders-style picker ("After…" X hours or "At time…").
+ * Renders into `container` (a .section). Returns { get(): { on, date } }.
+ */
+function ReminderPicker(container, { on = false, date = null, suggestionMs = null, clockMode = false }) {
+  const st = {
+    on,
+    mode: clockMode ? 'at' : 'after',
+    hours: 4,
+    minutes: 0,
+    clock: date ? fmtHM(date) : '07:30',
+    date: date || Date.now() + 4 * 3600e3,
+  };
+
+  function fmtHM(ts) { const d = new Date(ts); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
+
+  function recompute() {
+    if (st.mode === 'after') {
+      st.date = Date.now() + Math.max(1, st.hours * 60 + st.minutes) * 60e3;
+    } else {
+      const [hh, mm] = st.clock.split(':').map(Number);
+      const d = new Date(); d.setSeconds(0, 0); d.setHours(hh || 0, mm || 0);
+      if (d.getTime() <= Date.now() + 30e3) d.setDate(d.getDate() + 1);
+      st.date = d.getTime();
+    }
+  }
+
+  function methodNote() {
+    const m = store.settings.reminder;
+    if (m === 'shortcut') return 'Added to your Reminders app via the Shortcut.';
+    if (m === 'calendar') return 'Added as a Calendar event with an alert.';
+    return 'Shown inside ChargeLog only.';
+  }
+
+  function render() {
+    const hourOpts = Array.from({ length: 24 }, (_, i) => `<option value="${i}" ${i === st.hours ? 'selected' : ''}>${i} h</option>`).join('');
+    const minOpts = Array.from({ length: 12 }, (_, i) => i * 5).map((m) => `<option value="${m}" ${m === st.minutes ? 'selected' : ''}>${m} min</option>`).join('');
+    container.innerHTML = `
+      <div class="section-head">Reminder</div>
+      <div class="group">
+        <div class="item">
+          <div class="item-label"><span class="app-icon" style="background:var(--orange)">${ICON.bell}</span>Remind me</div>
+          ${toggleHTML('rem-on', st.on)}
+        </div>
+        ${st.on ? `
+        <div class="block">${segmentedHTML('rem-mode', [['after', 'After…'], ['at', 'At time…']], st.mode)}</div>
+        ${st.mode === 'after' ? `
+          <div class="block"><div class="chips">${PRESET_HOURS.map((hh) => `<button class="chip ${st.hours === hh && st.minutes === 0 ? 'on' : ''}" data-h="${hh}">${hh}h</button>`).join('')}</div></div>
+          <div class="item"><span>Hours</span><select id="rem-h">${hourOpts}</select></div>
+          <div class="item"><span>Minutes</span><select id="rem-m">${minOpts}</select></div>
+        ` : `
+          <div class="item"><span>Time</span><input type="time" id="rem-clock" value="${st.clock}"></div>
+        `}
+        ${suggestionMs && suggestionMs > 60e3 ? `<button class="item button" id="rem-suggest"><span class="item-label">${ICON.wand} Use charge estimate · ${fmt.dur(suggestionMs)}</span></button>` : ''}
+        ` : ''}
+      </div>
+      ${st.on ? `<div class="section-foot" id="rem-foot"></div>` : ''}`;
+    paintFoot();
+
+    container.querySelector('#rem-on').addEventListener('change', (e) => { st.on = e.target.checked; recompute(); render(); });
+    if (!st.on) return;
+    wireSegmented(container, 'rem-mode', (v) => { st.mode = v; recompute(); render(); });
+    container.querySelectorAll('[data-h]').forEach((b) => b.addEventListener('click', () => { st.hours = +b.dataset.h; st.minutes = 0; recompute(); render(); }));
+    const hs = container.querySelector('#rem-h'), ms = container.querySelector('#rem-m'), ck = container.querySelector('#rem-clock');
+    hs && hs.addEventListener('change', () => { st.hours = +hs.value; recompute(); render(); });
+    ms && ms.addEventListener('change', () => { st.minutes = +ms.value; recompute(); render(); });
+    ck && ck.addEventListener('change', () => { if (ck.value) { st.clock = ck.value; recompute(); paintFoot(); } });
+    const sg = container.querySelector('#rem-suggest');
+    sg && sg.addEventListener('click', () => {
+      const total = Math.min(23 * 60 + 55, Math.ceil(Math.ceil(suggestionMs / 60e3) / 5) * 5);
+      st.mode = 'after'; st.hours = Math.floor(total / 60); st.minutes = total % 60;
+      recompute(); render();
+    });
+  }
+
+  function paintFoot() {
+    const f = container.querySelector('#rem-foot');
+    if (f) f.textContent = `Rings ${fmt.clockAt(st.date)} · ${fmt.relative(st.date - Date.now())}\n${methodNote()}`;
+  }
+
+  if (!clockMode) recompute();
+  render();
+  return { get: () => { if (st.mode === 'after') recompute(); return { on: st.on, date: st.date }; } };
+}
+
+/* ---------- Delivery ---------- */
+
+function shortcutDateText(ts) {
+  const d = new Date(ts), p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+/** Hands the reminder to iOS. Returns true if the app is leaving for another app. */
+function deliverReminder(session) {
+  if (!session.alarm) return false;
+  const method = store.settings.reminder;
+  if (method === 'shortcut') {
+    const name = store.settings.shortcutName || DEFAULTS.shortcutName;
+    const url = `shortcuts://run-shortcut?name=${encodeURIComponent(name)}&input=text&text=${encodeURIComponent(shortcutDateText(session.alarm))}`;
+    window.location.href = url;
+    return true;
+  }
+  if (method === 'calendar') {
+    downloadICS(session);
+    return true;
+  }
+  return false;
+}
+
+function icsDate(ts) { return new Date(ts).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''); }
+function downloadICS(session) {
+  const start = session.alarm;
+  const ics = [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//ChargeLog//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    `UID:${session.id}-${start}@chargelog`,
+    `DTSTAMP:${icsDate(Date.now())}`,
+    `DTSTART:${icsDate(start)}`,
+    `DTEND:${icsDate(start + 10 * 60e3)}`,
+    'SUMMARY:Check the car (ChargeLog)',
+    `DESCRIPTION:Charging since ${fmt.time(session.start)} from ${fmt.pct(session.startPct)}. Open ChargeLog to log the end %.`,
+    'BEGIN:VALARM', 'TRIGGER:PT0S', 'ACTION:DISPLAY', 'DESCRIPTION:Check the car', 'END:VALARM',
+    'END:VEVENT', 'END:VCALENDAR',
+  ].join('\r\n');
+  const blob = new Blob([ics], { type: 'text/calendar' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'chargelog-reminder.ics';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+}
+
+function testReminder() {
+  const fake = { id: 'test', start: Date.now(), startPct: 50, alarm: Date.now() + 2 * 60e3 };
+  if (store.settings.reminder === 'app') { toast('Reminders are set to "In app only"'); return; }
+  deliverReminder(fake);
+}
+
+/* =========================================================
+   Screens: Charge, History + the charge sheets
+   ========================================================= */
+
+const ui = { tab: 'charge', statsRange: '1Y', statsMetric: 'cost', statsSel: null };
+
+function isStandalone() {
+  return window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+}
+
+/* ---------------- Charge tab ---------------- */
+
+function renderCharge() {
+  const el = document.getElementById('screen-charge');
+  const active = activeSession();
+  const done = completedSessions();
+  const showInstall = !isStandalone() && !store.settings.installHintDismissed && /iPhone|iPad|iPod/.test(navigator.userAgent);
+
+  el.innerHTML = `
+    <div class="title-row"><h1 class="large-title">Charge</h1></div>
+    <div class="stack">
+      ${showInstall ? `
+        <div class="banner info">
+          ${ICON.share}
+          <div style="flex:1"><b>Install ChargeLog</b><span class="small muted">Tap Share, then <b style="display:inline">Add to Home Screen</b>, to use it like an app.</span></div>
+          <button class="link-btn" data-act="dismiss-install">OK</button>
+        </div>` : ''}
+      ${active ? activeCardHTML(active) : idleCardHTML(done[0])}
+      ${monthSummaryHTML(done)}
+      ${done.length ? `
+        <div class="card" style="padding-top:14px;padding-bottom:10px">
+          <div class="row-between" style="margin-bottom:4px"><h3 class="card-title">Recent</h3><button class="link-btn" data-act="see-all">See all</button></div>
+          ${done.slice(0, 4).map((s, i) => (i ? '<div class="divider"></div>' : '') + `<button class="session-row" data-edit="${s.id}">${sessionRowInner(s)}</button>`).join('')}
+        </div>` : ''}
+    </div>`;
+}
+
+function liveEstimate(s, now = Date.now()) {
+  const perPct = energyFor(tariffOf(s), 1);
+  const power = +store.settings.power;
+  if (perPct <= 0 || power <= 0) return s.startPct;
+  return Math.min(100, s.startPct + ((now - s.start) / 3600e3) * power / perPct);
+}
+
+function activeCardHTML(s) {
+  const est = liveEstimate(s);
+  const due = s.alarm && s.alarm <= Date.now();
+  let alarmText;
+  if (!s.alarm) alarmText = `<b>Add a reminder</b>`;
+  else if (!due) alarmText = `<div><b>Reminder ${fmt.clockAt(s.alarm)}</b><div class="small" style="opacity:.85" data-countdown="${s.alarm}">${fmt.relative(s.alarm - Date.now())}</div></div>`;
+  else alarmText = `<div><b>Reminder time reached</b><div class="small" style="opacity:.85">${fmt.time(s.alarm)} · check the car and end the charge</div></div>`;
+
+  return `
+    <div class="active-card">
+      <div class="row-between">
+        <span class="pill"><span class="pulse">${ICON.bolt}</span>Charging</span>
+        <button class="circle-btn" data-act="active-menu" aria-label="More">${ICON.dots}</button>
+      </div>
+      <div class="active-main">
+        <div class="ring-wrap">
+          ${ringSVG({ from: 0, to: est, stroke: 11 })}
+          <div class="ring-label"><span class="ring-pct" data-est>≈${Math.round(est)}%</span><span class="ring-sub">from ${fmt.pct(s.startPct)}</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+          <div><div class="kv-label">Elapsed</div><div class="kv-big" data-elapsed="${s.start}">${fmt.timer(Date.now() - s.start)}</div></div>
+          <div><div class="kv-label">So far ≈</div><div class="kv-mid" data-sofar>${fmt.eur(costFor(tariffOf(s), Math.max(0, est - s.startPct)))}</div></div>
+        </div>
+      </div>
+      <button class="glass-row ${due ? 'due' : ''}" data-act="edit-alarm">
+        <span style="font-size:18px">${s.alarm ? ICON.bell : ICON.bellOff}</span>
+        <span style="flex:1;font-size:15px">${alarmText}</span>
+        <span style="font-size:13px;opacity:.7">${ICON.chevron}</span>
+      </button>
+      <button class="white-btn" data-act="end">${ICON.flag} End charge</button>
+    </div>`;
+}
+
+function idleCardHTML(last) {
+  return `
+    <div class="idle-card">
+      <div class="idle-icon">${ICON.car}</div>
+      <div>
+        <h2 class="idle-title">Ready to charge</h2>
+        <div class="muted small" style="margin-top:4px">${last
+          ? `Last: ${fmt.clock(last.end || last.start)} · ended at ${fmt.pct(last.endPct ?? 0)}`
+          : 'Plug in your car and log the battery %.'}</div>
+      </div>
+      <button class="primary-btn" data-act="start">${ICON.bolt} Start charging</button>
+    </div>`;
+}
+
+function monthSummaryHTML(done) {
+  const now = new Date();
+  const thisM = startOfMonth(now), prevM = addMonths(thisM, -1);
+  const inMonth = done.filter((s) => startOfMonth(s.start) === thisM);
+  const prev = done.filter((s) => startOfMonth(s.start) === prevM);
+  const cost = inMonth.reduce((a, s) => a + sCost(s), 0);
+  const energy = inMonth.reduce((a, s) => a + sEnergy(s), 0);
+  const prevCost = prev.reduce((a, s) => a + sCost(s), 0);
+  return `
+    <div class="card">
+      <div class="row-between">
+        <h3 class="card-title">${fmt.month(now)}</h3>
+        ${prevCost > 0 ? `<span class="caption" style="font-weight:600">Last month ${fmt.eur(prevCost)}</span>` : ''}
+      </div>
+      <div class="big-money">${fmt.eur(cost)}</div>
+      <div class="mini-stats">
+        <div><div class="mini-val">${fmt.kwh(energy)}</div><div class="caption">Energy</div></div>
+        <div><div class="mini-val">${inMonth.length}</div><div class="caption">Charges</div></div>
+        <div><div class="mini-val">${inMonth.length ? fmt.eur(cost / inMonth.length) : '–'}</div><div class="caption">Avg / charge</div></div>
+      </div>
+    </div>`;
+}
+
+function sessionRowInner(s) {
+  const end = s.endPct ?? s.startPct;
+  return `
+    <div class="session-ring">
+      ${ringSVG({ from: s.startPct, to: end, stroke: 9, size: 100, track: 'rgba(33,199,140,0.15)', color: 'var(--brand)' })}
+      <div class="day"><b>${new Date(s.start).getDate()}</b><small>${fmt.weekdayShort(s.start)}</small></div>
+    </div>
+    <div class="session-mid">
+      <div class="session-pcts">${fmt.pct(s.startPct)} ${ICON.arrow} ${fmt.pct(end)}</div>
+      <div class="caption">${fmt.time(s.start)} · ${fmt.dur(sDuration(s))}${s.note ? ' · ' + esc(s.note) : ''}</div>
+    </div>
+    <div class="session-right">
+      <div class="session-cost">${fmt.eur(sCost(s))}</div>
+      <div class="caption">${fmt.kwh(sEnergy(s))}</div>
+    </div>`;
+}
+
+/* Live ticking while the Charge tab is open */
+function tick() {
+  document.querySelectorAll('[data-elapsed]').forEach((el) => { el.textContent = fmt.timer(Date.now() - +el.dataset.elapsed); });
+  document.querySelectorAll('[data-countdown]').forEach((el) => { el.textContent = fmt.relative(+el.dataset.countdown - Date.now()); });
+  const a = activeSession();
+  if (a && a.alarm && a.alarm <= Date.now() && !document.querySelector('.glass-row.due') && ui.tab === 'charge' && !document.querySelector('.sheet')) renderCharge();
+}
+
+/* ---------------- Start sheet ---------------- */
+
+function openStartSheet() {
+  const s = store.settings;
+  const t = tariffNow();
+  const st = { startPct: clamp(+s.lastStart, 0, 99), target: +s.target, earlier: false, startAt: Date.now() };
+
+  const sh = openSheet({ title: 'Start charging', footer: true });
+  sh.body.innerHTML = `
+    <div class="section"><div class="section-head">Battery now</div><div class="group"><div class="block" id="st-pct"></div></div></div>
+    <div class="section" id="st-est"></div>
+    <div class="section" id="st-rem"></div>
+    <div class="section">
+      <div class="group">
+        <div class="item"><span>Started earlier</span>${toggleHTML('st-earlier', false)}</div>
+        <div class="item hidden" id="st-at-row"><span>Started at</span><input type="datetime-local" id="st-at" value="${toLocalInput(Date.now())}" max="${toLocalInput(Date.now())}"></div>
+      </div>
+    </div>`;
+  sh.foot.innerHTML = `<button class="primary-btn" id="st-go">${ICON.bolt} Start charging</button>`;
+
+  const est = () => estimateMs(t, st.startPct, st.target, +s.power);
+  let reminder;
+  function paintEstimate() {
+    const box = sh.body.querySelector('#st-est');
+    const toTarget = Math.max(0, st.target - st.startPct);
+    const ms = est();
+    box.innerHTML = `
+      <div class="section-head">Estimate</div>
+      <div class="group">
+        <div class="block">
+          <div class="row-between" style="margin-bottom:10px"><span>Charge to</span><span class="muted num">${fmt.pct(st.target)}</span></div>
+          <input type="range" id="st-target" min="5" max="100" step="5" value="${st.target}" style="--p:${((st.target - 5) / 95) * 100}%">
+        </div>
+        <div class="item"><span>Energy</span><span class="item-value">${fmt.kwh(energyFor(t, toTarget))}</span></div>
+        <div class="item"><span>Cost</span><span class="item-value">${fmt.eur(costFor(t, toTarget))}</span></div>
+        ${ms ? `<div class="item"><span>Time</span><span class="item-value">≈ ${fmt.dur(ms)}</span></div>` : ''}
+      </div>
+      <div class="section-foot">Time is estimated for a ${fmt.num(+s.power)} kW charger. You can change it in Settings.</div>`;
+    const r = box.querySelector('#st-target');
+    r.addEventListener('input', () => {
+      st.target = +r.value; r.style.setProperty('--p', ((st.target - 5) / 95) * 100 + '%');
+      box.querySelector('.row-between .muted').textContent = fmt.pct(st.target);
+    });
+    r.addEventListener('change', () => { s.target = st.target; store.save(); paintEstimate(); paintReminder(); });
+  }
+  function paintReminder() {
+    const prev = reminder ? reminder.get() : { on: false };
+    reminder = ReminderPicker(sh.body.querySelector('#st-rem'), { on: prev.on, suggestionMs: est() });
+  }
+
+  PercentInput(sh.body.querySelector('#st-pct'), {
+    value: st.startPct, min: 0, max: 99,
+    onChange: (v) => { st.startPct = v; clearTimeout(paintEstimate.t); paintEstimate.t = setTimeout(() => { paintEstimate(); paintReminder(); }, 120); },
+  });
+  paintEstimate(); paintReminder();
+
+  const earlier = sh.body.querySelector('#st-earlier'), atRow = sh.body.querySelector('#st-at-row'), at = sh.body.querySelector('#st-at');
+  earlier.addEventListener('change', () => { st.earlier = earlier.checked; atRow.classList.toggle('hidden', !st.earlier); });
+
+  sh.foot.querySelector('#st-go').addEventListener('click', () => {
+    const r = reminder.get();
+    let start = Date.now();
+    if (st.earlier) { const v = fromLocalInput(at.value); if (v && v <= Date.now()) start = v; }
+    const sess = { id: uid(), start, end: null, startPct: st.startPct, endPct: null, ...tariffNow(), alarm: r.on ? r.date : null, note: '' };
+    store.sessions.push(sess);
+    s.lastStart = st.startPct;
+    store.save();
+    sh.close();
+    render();
+    toast('Charging started');
+    if (sess.alarm) setTimeout(() => deliverReminder(sess), 350);
+  });
+}
+
+/* ---------------- End sheet ---------------- */
+
+function openEndSheet() {
+  const sess = activeSession();
+  if (!sess) return;
+  const t = tariffOf(sess);
+  const st = { endPct: clamp(Math.max(+store.settings.target, sess.startPct + 1), 0, 100), earlier: false };
+
+  const sh = openSheet({ title: 'End charge', footer: true });
+  sh.body.innerHTML = `
+    <div class="section">
+      <div class="section-head">Battery now</div>
+      <div class="group"><div class="block" id="en-pct"></div></div>
+      <div class="section-foot">Started at ${fmt.pct(sess.startPct)} · ${fmt.clock(sess.start)}</div>
+    </div>
+    <div class="section">
+      <div class="section-head">This charge</div>
+      <div class="group">
+        <div class="block"><div class="result-cols" id="en-res"></div></div>
+        <div class="block"><div class="formula" id="en-formula"></div></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="group">
+        <div class="item"><span>Ended earlier</span>${toggleHTML('en-earlier', false)}</div>
+        <div class="item hidden" id="en-at-row"><span>Ended at</span><input type="datetime-local" id="en-at" value="${toLocalInput(Date.now())}" min="${toLocalInput(sess.start)}" max="${toLocalInput(Date.now())}"></div>
+      </div>
+      <div class="section-foot" id="en-dur"></div>
+    </div>`;
+  sh.foot.innerHTML = `<button class="primary-btn" id="en-save"></button>`;
+  const btn = sh.foot.querySelector('#en-save');
+  const at = sh.body.querySelector('#en-at');
+
+  function endTime() { if (st.earlier) { const v = fromLocalInput(at.value); if (v) return clamp(v, sess.start, Date.now()); } return Date.now(); }
+  function paint() {
+    const added = Math.max(0, st.endPct - sess.startPct);
+    const e = energyFor(t, added), c = costFor(t, added);
+    sh.body.querySelector('#en-res').innerHTML = `
+      <div><div class="caption">Added</div><div class="result-val">+${fmt.pct(added)}</div></div>
+      <div><div class="caption">Energy</div><div class="result-val">${fmt.kwh(e)}</div></div>
+      <div><div class="caption">Cost</div><div class="result-val" style="color:var(--brand)">${fmt.eur(c)}</div></div>`;
+    sh.body.querySelector('#en-formula').innerHTML =
+      `${fmt.pct(added)} × ${fmt.num(t.cap)} kWh × ${fmt.num(t.loss)} = ${fmt.num(e)} kWh<br>` +
+      `${fmt.num(e)} kWh × ${fmt.num(t.price, 4)} € × ${fmt.num(t.vat)} IVA = ${fmt.eur(c)}`;
+    sh.body.querySelector('#en-dur').textContent = 'Charging time: ' + fmt.dur(endTime() - sess.start);
+    btn.innerHTML = `${ICON.check} Save · ${fmt.eur(c)}`;
+    btn.disabled = added <= 0;
+  }
+  PercentInput(sh.body.querySelector('#en-pct'), { value: st.endPct, min: Math.min(sess.startPct, 99), max: 100, onChange: (v) => { st.endPct = v; paint(); } });
+  const earlier = sh.body.querySelector('#en-earlier'), atRow = sh.body.querySelector('#en-at-row');
+  earlier.addEventListener('change', () => { st.earlier = earlier.checked; atRow.classList.toggle('hidden', !st.earlier); paint(); });
+  at.addEventListener('change', paint);
+  paint();
+
+  btn.addEventListener('click', () => {
+    if (st.endPct <= sess.startPct) return;
+    const hadFutureAlarm = sess.alarm && sess.alarm > Date.now();
+    sess.endPct = st.endPct;
+    sess.end = endTime();
+    sess.alarm = null;
+    store.save();
+    sh.close();
+    render();
+    toast(`Saved · ${fmt.eur(sCost(sess))}`);
+    if (hadFutureAlarm && store.settings.reminder !== 'app') {
+      setTimeout(() => toast('Tick off the pending reminder in Reminders'), 2800);
+    }
+  });
+}
+
+/* ---------------- Reminder sheet (active charge) ---------------- */
+
+function openAlarmSheet() {
+  const sess = activeSession();
+  if (!sess) return;
+  const future = sess.alarm && sess.alarm > Date.now();
+  const remainingMs = (() => {
+    const total = estimateMs(tariffOf(sess), sess.startPct, +store.settings.target, +store.settings.power);
+    if (!total) return null;
+    const r = total - (Date.now() - sess.start);
+    return r > 60e3 ? r : null;
+  })();
+  let picker;
+  const sh = openSheet({
+    title: 'Reminder', right: 'Save', medium: true,
+    onRight: (close) => {
+      const r = picker.get();
+      const prev = sess.alarm;
+      sess.alarm = r.on ? r.date : null;
+      store.save();
+      close();
+      render();
+      if (r.on && r.date !== prev) setTimeout(() => deliverReminder(sess), 350);
+      else if (!r.on && prev && prev > Date.now() && store.settings.reminder !== 'app') toast('Reminder removed — delete it in Reminders too');
+    },
+  });
+  sh.body.innerHTML = `<div class="section" id="al-rem"></div>`;
+  picker = ReminderPicker(sh.body.querySelector('#al-rem'), { on: true, date: future ? sess.alarm : null, clockMode: !!future, suggestionMs: remainingMs });
+}
+
+function activeMenu() {
+  const sess = activeSession();
+  if (!sess) return;
+  actionSheet({
+    title: 'Discard this charge?', message: "It won't be saved to your history.",
+    actions: [{ label: 'Discard charge', destructive: true, handler: () => {
+      store.data.sessions = store.sessions.filter((x) => x.id !== sess.id);
+      store.save(); render(); toast('Charge discarded');
+    } }],
+  });
+}
+
+/* ---------------- History tab ---------------- */
+
+function renderHistory() {
+  const el = document.getElementById('screen-history');
+  const done = completedSessions();
+  const groups = new Map();
+  done.forEach((s) => { const k = startOfMonth(s.start); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(s); });
+
+  el.innerHTML = `
+    <div class="title-row">
+      <h1 class="large-title">History</h1>
+      ${done.length ? `<button class="icon-btn" data-act="export-csv" aria-label="Export CSV">${ICON.share}</button>` : ''}
+    </div>
+    ${!done.length ? `
+      <div class="empty">${ICON.car}<h3>No charges yet</h3><div>Finished charges show up here, grouped by month.</div></div>` :
+      [...groups.entries()].sort((a, b) => b[0] - a[0]).map(([month, list]) => `
+        <div class="section">
+          <div class="month-head">
+            <span class="name">${fmt.month(month)}</span>
+            <span class="tot">${fmt.eur(list.reduce((a, s) => a + sCost(s), 0))}</span>
+            <span class="caption">· ${fmt.kwh(list.reduce((a, s) => a + sEnergy(s), 0))}</span>
+          </div>
+          <div class="group">
+            ${list.map((s) => `
+              <div class="swipe" data-id="${s.id}">
+                <button class="swipe-del" data-del="${s.id}">${ICON.trash}<span>Delete</span></button>
+                <div class="swipe-content"><button class="session-row" data-edit="${s.id}">${sessionRowInner(s)}</button></div>
+              </div>`).join('')}
+          </div>
+        </div>`).join('')}
+    ${done.length ? '<div class="caption" style="text-align:center;margin-top:-6px">Swipe left on a charge to delete it. Tap to edit.</div>' : ''}`;
+  wireSwipes(el);
+}
+
+function wireSwipes(root) {
+  const W = 88;
+  root.querySelectorAll('.swipe').forEach((row) => {
+    const content = row.querySelector('.swipe-content');
+    let x0 = null, y0 = null, dx = 0, dragging = false, open = false;
+    row.addEventListener('touchstart', (e) => {
+      root.querySelectorAll('.swipe.open').forEach((o) => { if (o !== row) { o.classList.remove('open'); o.querySelector('.swipe-content').style.transform = ''; } });
+      x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; dx = 0; dragging = false; open = row.classList.contains('open');
+      content.style.transition = 'none';
+    }, { passive: true });
+    row.addEventListener('touchmove', (e) => {
+      if (x0 == null) return;
+      const mx = e.touches[0].clientX - x0, my = e.touches[0].clientY - y0;
+      if (!dragging && Math.abs(mx) > 8 && Math.abs(mx) > Math.abs(my)) dragging = true;
+      if (!dragging) return;
+      dx = clamp((open ? -W : 0) + mx, -W - 30, 0);
+      content.style.transform = `translateX(${dx}px)`;
+    }, { passive: true });
+    row.addEventListener('touchend', () => {
+      content.style.transition = '';
+      if (dragging) {
+        const shouldOpen = dx < -W / 2;
+        row.classList.toggle('open', shouldOpen);
+        content.style.transform = shouldOpen ? `translateX(${-W}px)` : '';
+        row.dataset.justSwiped = '1';
+        setTimeout(() => delete row.dataset.justSwiped, 50);
+      }
+      x0 = null;
+    });
+  });
+}
+
+function deleteSession(id) {
+  store.data.sessions = store.sessions.filter((x) => x.id !== id);
+  store.save(); render(); toast('Charge deleted');
+}
+
+/* ---------------- Edit a finished charge ---------------- */
+
+function openEditSheet(id) {
+  const sess = store.sessions.find((x) => x.id === id);
+  if (!sess) return;
+  const st = {
+    start: sess.start, end: sess.end ?? Date.now(), startPct: sess.startPct, endPct: sess.endPct ?? sess.startPct,
+    cap: sess.cap, lossPct: Math.round((sess.loss - 1) * 10000) / 100, price: sess.price, vatPct: Math.round((sess.vat - 1) * 10000) / 100, note: sess.note || '',
+  };
+  const tariff = () => ({ cap: st.cap, loss: 1 + st.lossPct / 100, price: st.price, vat: 1 + st.vatPct / 100 });
+
+  const sh = openSheet({
+    title: 'Edit charge', right: 'Save',
+    onRight: (close) => {
+      readFields();
+      Object.assign(sess, {
+        start: st.start, end: Math.max(st.end, st.start), startPct: st.startPct, endPct: Math.max(st.endPct, st.startPct),
+        ...tariff(), note: st.note.trim(),
+      });
+      store.save(); close(); render(); toast('Charge updated');
+    },
+  });
+  sh.body.innerHTML = `
+    <div class="section"><div class="group"><div class="block row-between" id="ed-sum"></div></div></div>
+    <div class="section">
+      <div class="section-head">Battery</div>
+      <div class="group">
+        ${['startPct', 'endPct'].map((k) => `
+          <div class="block">
+            <div class="row-between" style="margin-bottom:10px">
+              <span>${k === 'startPct' ? 'Start' : 'End'}</span>
+              <span style="display:flex;align-items:center;gap:10px">
+                <span class="muted num" data-pv="${k}"></span>
+                <span class="segmented" style="padding:2px"><button data-step="${k}:-1" style="padding:4px 14px">${ICON.minus}</button><button data-step="${k}:1" style="padding:4px 14px">${ICON.plus}</button></span>
+              </span>
+            </div>
+            <input type="range" min="0" max="100" step="1" data-range="${k}">
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-head">Time</div>
+      <div class="group">
+        <div class="item"><span>Started</span><input type="datetime-local" id="ed-start" value="${toLocalInput(st.start)}"></div>
+        <div class="item"><span>Ended</span><input type="datetime-local" id="ed-end" value="${toLocalInput(st.end)}"></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-head">Tariff for this charge</div>
+      <div class="group">
+        <div class="item"><span>Battery</span>${numberField('ed-cap', st.cap, 'kWh')}</div>
+        <div class="item"><span>Cable loss</span>${numberField('ed-loss', st.lossPct, '%')}</div>
+        <div class="item"><span>Price</span>${numberField('ed-price', st.price, '€/kWh')}</div>
+        <div class="item"><span>IVA</span>${numberField('ed-vat', st.vatPct, '%')}</div>
+      </div>
+      <div class="section-foot">These were saved when the charge started. Edit them if the price was different.</div>
+    </div>
+    <div class="section">
+      <div class="section-head">Note</div>
+      <div class="group"><div class="block"><textarea id="ed-note" placeholder="Optional">${esc(st.note)}</textarea></div></div>
+    </div>
+    <div class="section"><div class="group"><button class="item button destructive" id="ed-del">Delete charge</button></div></div>`;
+
+  const b = sh.body;
+  function readFields() {
+    const num = (id, fallback) => { const v = parseNum(b.querySelector(id).value); return Number.isFinite(v) && v >= 0 ? v : fallback; };
+    st.cap = num('#ed-cap', st.cap); st.lossPct = num('#ed-loss', st.lossPct); st.price = num('#ed-price', st.price); st.vatPct = num('#ed-vat', st.vatPct);
+    st.start = fromLocalInput(b.querySelector('#ed-start').value) ?? st.start;
+    st.end = fromLocalInput(b.querySelector('#ed-end').value) ?? st.end;
+    st.note = b.querySelector('#ed-note').value;
+  }
+  function paint() {
+    const t = tariff(), added = Math.max(0, st.endPct - st.startPct);
+    b.querySelector('#ed-sum').innerHTML = `
+      <div>
+        <div class="rounded" style="font-size:34px;font-weight:700">${fmt.eur(costFor(t, added))}</div>
+        <div class="muted">${fmt.kwh(energyFor(t, added))} · +${fmt.pct(added)}</div>
+      </div>
+      <div class="session-ring" style="width:58px;height:58px">${ringSVG({ from: st.startPct, to: st.endPct, stroke: 12, track: 'rgba(33,199,140,0.15)', color: 'var(--brand)' })}</div>`;
+    ['startPct', 'endPct'].forEach((k) => {
+      b.querySelector(`[data-pv="${k}"]`).textContent = fmt.pct(st[k]);
+      const r = b.querySelector(`[data-range="${k}"]`); r.value = st[k]; r.style.setProperty('--p', st[k] + '%');
+    });
+  }
+  b.querySelectorAll('[data-range]').forEach((r) => r.addEventListener('input', () => { st[r.dataset.range] = +r.value; paint(); }));
+  b.querySelectorAll('[data-step]').forEach((btn) => btn.addEventListener('click', () => {
+    const [k, d] = btn.dataset.step.split(':'); st[k] = clamp(st[k] + +d, 0, 100); paint();
+  }));
+  b.querySelectorAll('.field input').forEach((inp) => inp.addEventListener('input', () => { readFields(); paint(); }));
+  b.querySelector('#ed-del').addEventListener('click', () => actionSheet({
+    title: 'Delete this charge?', actions: [{ label: 'Delete', destructive: true, handler: () => { sh.close(); setTimeout(() => deleteSession(id), 200); } }],
+  }));
+  paint();
+}
+
+/* =========================================================
+   Stats tab: monthly chart, tiles, cost-per-charge chart
+   ========================================================= */
+
+function niceMax(v) {
+  if (!(v > 0)) return 1;
+  const p = Math.pow(10, Math.floor(Math.log10(v)));
+  const n = v / p;
+  const m = n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10;
+  return m * p;
+}
+const axisLabel = (v) => fmt.num(v, v < 10 && v % 1 ? 1 : 0);
+
+function statsData() {
+  const done = completedSessions().slice().sort((a, b) => a.start - b.start);
+  const thisM = startOfMonth(Date.now());
+  let from;
+  if (ui.statsRange === '6M') from = addMonths(thisM, -5);
+  else if (ui.statsRange === '1Y') from = addMonths(thisM, -11);
+  else from = Math.min(done.length ? startOfMonth(done[0].start) : thisM, thisM);
+  const sessions = done.filter((s) => s.start >= from);
+  const buckets = [];
+  for (let m = from, guard = 0; m <= thisM && guard < 600; m = addMonths(m, 1), guard++) {
+    const items = sessions.filter((s) => startOfMonth(s.start) === m);
+    buckets.push({
+      month: m, count: items.length,
+      cost: items.reduce((a, s) => a + sCost(s), 0),
+      energy: items.reduce((a, s) => a + sEnergy(s), 0),
+    });
+  }
+  return { done, sessions, buckets };
+}
+
+function renderStats() {
+  const el = document.getElementById('screen-stats');
+  const { done, sessions, buckets } = statsData();
+  el.innerHTML = `
+    <div class="title-row"><h1 class="large-title">Stats</h1></div>
+    <div class="stack">
+      ${segmentedHTML('range', [['6M', '6M'], ['1Y', '1Y'], ['All', 'All']], ui.statsRange)}
+      ${!done.length ? `<div class="empty">${ICON.chart}<h3>No stats yet</h3><div>Finish your first charge to see monthly spending and energy.</div></div>` : `
+        <div class="card" id="month-card"></div>
+        <div class="tiles" id="tiles"></div>
+        ${sessions.length >= 2 ? `<div class="card"><h3 class="card-title" style="margin-bottom:10px">Cost per charge</h3><div id="per-charge"></div></div>` : ''}
+      `}
+    </div>`;
+  wireSegmented(el, 'range', (v) => { ui.statsRange = v; ui.statsSel = null; renderStats(); });
+  if (!done.length) return;
+  renderMonthCard(buckets);
+  renderTiles(sessions);
+  if (sessions.length >= 2) renderPerCharge(sessions);
+}
+
+function renderMonthCard(buckets) {
+  const card = document.getElementById('month-card');
+  const key = ui.statsMetric === 'cost' ? 'cost' : 'energy';
+  const f = key === 'cost' ? fmt.eur : fmt.kwh;
+  const total = buckets.reduce((a, b) => a + b[key], 0);
+  const avg = buckets.length ? total / buckets.length : 0;
+  const sel = buckets.find((b) => b.month === ui.statsSel) || null;
+  const rangeLabel = { '6M': 'last 6 months', '1Y': 'last 12 months', All: 'all time' }[ui.statsRange];
+
+  card.innerHTML = `
+    <div class="row-between" style="align-items:flex-start;margin-bottom:12px">
+      <div>
+        <div class="caption" style="font-weight:600">${sel ? fmt.month(sel.month) : 'Total · ' + rangeLabel}</div>
+        <div class="stat-head-val">${f(sel ? sel[key] : total)}</div>
+        <div class="caption">${sel ? `${sel.count} charge${sel.count === 1 ? '' : 's'}` : `avg ${f(avg)} / month`}</div>
+      </div>
+      <div style="width:116px">${segmentedHTML('metric', [['cost', '€'], ['energy', 'kWh']], ui.statsMetric)}</div>
+    </div>
+    <div id="bars"></div>
+    <div class="caption" style="text-align:center;margin-top:6px">${sel ? 'Tap the month again to clear' : 'Tap a month for details'}</div>`;
+  wireSegmented(card, 'metric', (v) => { ui.statsMetric = v; renderMonthCard(buckets); });
+
+  const box = card.querySelector('#bars');
+  const W = Math.max(260, box.clientWidth || 320), H = 220, padL = 34, padB = 22, padT = 14;
+  const max = niceMax(Math.max(...buckets.map((b) => b[key]), avg) * 1.05);
+  const n = buckets.length, band = (W - padL) / n, bw = Math.max(4, Math.min(28, band * 0.62));
+  const y = (v) => padT + (H - padT - padB) * (1 - v / max);
+  const grid = [0, 0.25, 0.5, 0.75, 1].map((r) => {
+    const v = max * r, yy = y(v);
+    return `<line class="grid" x1="${padL}" x2="${W}" y1="${yy}" y2="${yy}"/><text x="0" y="${yy + 4}">${axisLabel(v)}</text>`;
+  }).join('');
+  const step = n > 12 ? 3 : 1;
+  const bars = buckets.map((b, i) => {
+    const x = padL + i * band + (band - bw) / 2, yy = y(b[key]), hgt = Math.max(0, H - padB - yy);
+    const dim = sel && sel.month !== b.month ? 0.3 : 1;
+    const r = Math.min(5, bw / 2, hgt);
+    const path = hgt > 0
+      ? `M${x},${H - padB} V${yy + r} Q${x},${yy} ${x + r},${yy} H${x + bw - r} Q${x + bw},${yy} ${x + bw},${yy + r} V${H - padB} Z`
+      : '';
+    return `
+      ${path ? `<path class="bar" d="${path}" fill="url(#barGrad)" opacity="${dim}"/>` : ''}
+      ${i % step === 0 ? `<text x="${padL + i * band + band / 2}" y="${H - 6}" text-anchor="middle" ${sel && sel.month === b.month ? 'style="fill:var(--text);font-weight:700"' : ''}>${fmt.monthNarrow(b.month)}</text>` : ''}
+      <rect x="${padL + i * band}" y="0" width="${band}" height="${H}" fill="transparent" data-month="${b.month}"/>`;
+  }).join('');
+  const avgLine = !sel && avg > 0 ? `<line class="avg" x1="${padL}" x2="${W}" y1="${y(avg)}" y2="${y(avg)}"/><text x="${padL + 4}" y="${y(avg) - 5}" style="font-weight:600">avg</text>` : '';
+
+  box.innerHTML = `<svg class="chart" viewBox="0 0 ${W} ${H}" width="100%" height="${H}">
+    <defs><linearGradient id="barGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#26d18f"/><stop offset="1" stop-color="#0a80a8"/></linearGradient></defs>
+    ${grid}${bars}${avgLine}</svg>`;
+  box.querySelectorAll('[data-month]').forEach((r) => r.addEventListener('click', () => {
+    const m = +r.dataset.month; ui.statsSel = ui.statsSel === m ? null : m; renderMonthCard(buckets);
+  }));
+}
+
+function renderTiles(list) {
+  const n = Math.max(list.length, 1);
+  const cost = list.reduce((a, s) => a + sCost(s), 0);
+  const energy = list.reduce((a, s) => a + sEnergy(s), 0);
+  const added = list.reduce((a, s) => a + addedPct(s), 0);
+  const dur = list.reduce((a, s) => a + sDuration(s), 0);
+  const tile = (title, val, icon, color) => `
+    <div class="tile">
+      <div class="tile-icon" style="color:${color};background:color-mix(in srgb, ${color} 16%, transparent)">${icon}</div>
+      <div><div class="tile-val">${val}</div><div class="caption">${title}</div></div>
+    </div>`;
+  document.getElementById('tiles').innerHTML = [
+    tile('Spent', fmt.eur(cost), ICON.euro, 'var(--brand)'),
+    tile('Energy', fmt.kwh(energy), ICON.bolt, '#e6a800'),
+    tile('Charges', list.length, ICON.hash, 'var(--blue)'),
+    tile('Avg per charge', fmt.eur(cost / n), ICON.divide, 'var(--purple)'),
+    tile('Avg battery added', '+' + fmt.pct(added / n), ICON.battery, 'var(--teal)'),
+    tile('Avg charge time', fmt.dur(dur / n), ICON.clock, 'var(--orange)'),
+  ].join('');
+}
+
+function renderPerCharge(list) {
+  const box = document.getElementById('per-charge');
+  const W = Math.max(260, box.clientWidth || 320), H = 170, padL = 34, padB = 20, padT = 10, padR = 8;
+  const t0 = list[0].start, t1 = list[list.length - 1].start;
+  const span = Math.max(1, t1 - t0);
+  const max = niceMax(Math.max(...list.map(sCost)) * 1.1);
+  const x = (ts) => padL + 6 + (W - padL - padR - 12) * ((ts - t0) / span);
+  const y = (v) => padT + (H - padT - padB) * (1 - v / max);
+  const pts = list.map((s) => [x(s.start), y(sCost(s))]);
+  // Catmull-Rom → Bézier for a smooth line
+  let d = `M${pts[0][0]},${pts[0][1]}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
+    const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+    d += ` C${c1[0]},${c1[1]} ${c2[0]},${c2[1]} ${p2[0]},${p2[1]}`;
+  }
+  const grid = [0, 0.5, 1].map((r) => { const v = max * r; return `<line class="grid" x1="${padL}" x2="${W}" y1="${y(v)}" y2="${y(v)}"/><text x="0" y="${y(v) + 4}">${axisLabel(v)}</text>`; }).join('');
+  const dateLbl = (ts) => new Date(ts).toLocaleDateString(DATE_LOCALE, { day: 'numeric', month: 'short' });
+  box.innerHTML = `<svg class="chart" viewBox="0 0 ${W} ${H}" width="100%" height="${H}">
+    ${grid}
+    <path d="${d}" fill="none" stroke="var(--brand)" stroke-opacity="0.5" stroke-width="2.5" stroke-linecap="round"/>
+    ${pts.map((p) => `<circle cx="${p[0]}" cy="${p[1]}" r="3.6" fill="var(--brand)"/>`).join('')}
+    <text x="${padL}" y="${H - 4}">${dateLbl(t0)}</text>
+    <text x="${W - padR}" y="${H - 4}" text-anchor="end">${dateLbl(t1)}</text>
+  </svg>`;
+}
+
+/* =========================================================
+   Settings tab, backup/export, navigation and boot
+   ========================================================= */
+
+function renderSettings() {
+  const el = document.getElementById('screen-settings');
+  const s = store.settings;
+  const method = s.reminder;
+  const methodRow = (val, label, icon, color) => `
+    <button class="item button" data-method="${val}" style="color:var(--text)">
+      <span class="item-label"><span class="app-icon" style="background:${color}">${icon}</span>${label}</span>
+      <span style="color:var(--brand);font-size:18px">${method === val ? ICON.check : ''}</span>
+    </button>`;
+
+  el.innerHTML = `
+    <div class="title-row"><h1 class="large-title">Settings</h1></div>
+
+    <div class="section">
+      <div class="section-head">Car &amp; charger</div>
+      <div class="group">
+        <div class="item"><span>Battery capacity</span>${numberField('set-capacity', s.capacity, 'kWh')}</div>
+        <div class="item"><span>Cable / heat loss</span>${numberField('set-lossPct', s.lossPct, '%')}</div>
+        <div class="item"><span>Charger power</span>${numberField('set-power', s.power, 'kW')}</div>
+      </div>
+      <div class="section-foot">Charger power is only used to estimate charging time and the live % while charging.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">Electricity price</div>
+      <div class="group">
+        <div class="item"><span>Price</span>${numberField('set-price', s.price, '€/kWh')}</div>
+        <div class="item"><span>IVA</span>${numberField('set-vatPct', s.vatPct, '%')}</div>
+      </div>
+    </div>
+
+    <div class="section" id="cost-table"></div>
+
+    <div class="section">
+      <div class="group"><button class="item button" data-act="apply-all"><span class="item-label">${ICON.repeat} Apply these values to all past charges</span></button></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">Reminders go to</div>
+      <div class="group">
+        ${methodRow('shortcut', 'Reminders app', ICON.bell, 'var(--orange)')}
+        ${methodRow('calendar', 'Calendar event', ICON.calendar, 'var(--red)')}
+        ${methodRow('app', 'In ChargeLog only', ICON.bolt, 'var(--brand)')}
+      </div>
+      <div class="section-foot">${{
+        shortcut: 'Uses a small Shortcut to create a real reminder that rings even when ChargeLog is closed, with the usual Reminders snooze options.',
+        calendar: 'Adds an event with an alert to your calendar. iOS asks you to confirm each time.',
+        app: 'The reminder only shows inside ChargeLog. Nothing rings when the app is closed.',
+      }[method]}</div>
+    </div>
+
+    ${method === 'shortcut' ? `
+    <div class="section">
+      <div class="group">
+        <button class="item button" data-act="shortcut-help"><span class="item-label">${ICON.info} How to set up the Shortcut</span><span style="color:var(--text3)">${ICON.chevron}</span></button>
+        <div class="item"><span>Shortcut name</span><div class="field"><input id="set-shortcutName" value="${esc(s.shortcutName)}" style="width:170px" autocomplete="off" autocapitalize="words"></div></div>
+        <button class="item button" data-act="test-reminder"><span class="item-label">${ICON.bell} Send a test reminder (in 2 min)</span></button>
+      </div>
+    </div>` : method === 'calendar' ? `
+    <div class="section"><div class="group"><button class="item button" data-act="test-reminder"><span class="item-label">${ICON.calendar} Try it (event in 2 min)</span></button></div></div>` : ''}
+
+    <div class="section">
+      <div class="section-head">Your data</div>
+      <div class="group">
+        <button class="item button" data-act="backup"><span class="item-label">${ICON.download} Save a backup</span></button>
+        <button class="item button" data-act="restore"><span class="item-label">${ICON.upload} Restore from backup</span></button>
+        <button class="item button" data-act="export-csv"><span class="item-label">${ICON.share} Export CSV</span></button>
+      </div>
+      <div class="section-foot">Your charges are stored only on this iPhone. Save a backup now and then (to Files or iCloud Drive) so nothing is lost if Safari's data is cleared.</div>
+    </div>
+
+    <div class="section">
+      <div class="group">
+        <div class="item"><span>Charges logged</span><span class="item-value">${completedSessions().length}</span></div>
+        <div class="item"><span>Installed as app</span><span class="item-value">${isStandalone() ? 'Yes' : 'No — use Share → Add to Home Screen'}</span></div>
+        <div class="item"><span>Version</span><span class="item-value">${APP_VERSION}</span></div>
+      </div>
+    </div>
+    <input type="file" id="restore-file" accept="application/json,.json" class="hidden">`;
+
+  paintCostTable();
+
+  ['capacity', 'lossPct', 'power', 'price', 'vatPct'].forEach((k) => {
+    const inp = el.querySelector('#set-' + k);
+    inp.addEventListener('input', () => {
+      const v = parseNum(inp.value);
+      if (Number.isFinite(v) && v >= 0) { s[k] = v; store.save(); paintCostTable(); }
+    });
+    inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') inp.blur(); });
+  });
+  const sn = el.querySelector('#set-shortcutName');
+  sn && sn.addEventListener('change', () => { s.shortcutName = sn.value.trim() || DEFAULTS.shortcutName; store.save(); });
+  el.querySelectorAll('[data-method]').forEach((b) => b.addEventListener('click', () => { s.reminder = b.dataset.method; store.save(); renderSettings(); }));
+  el.querySelector('#restore-file').addEventListener('change', onRestoreFile);
+}
+
+function paintCostTable() {
+  const t = tariffNow(), s = store.settings;
+  const row = (label, pct) => `<div class="item"><span>${label}</span><span class="item-value">${fmt.num(energyFor(t, pct))} kWh · ${fmt.eur(costFor(t, pct))}</span></div>`;
+  document.getElementById('cost-table').innerHTML = `
+    <div class="section-head">What it costs</div>
+    <div class="group">
+      ${row('1% of battery', 1)}${row('10% of battery', 10)}${row('Full 0 → 100%', 100)}
+      <div class="item"><span>Effective price</span><span class="item-value">${fmt.num(t.price * t.vat, 4)} €/kWh</span></div>
+    </div>
+    <div class="section-foot">kWh = battery % × ${fmt.num(s.capacity)} kWh × ${fmt.num(t.loss)}
+€ = kWh × ${fmt.num(s.price, 4)} × ${fmt.num(t.vat)} IVA
+
+New prices apply to new charges. Past charges keep the price they were logged with.</div>`;
+}
+
+function openShortcutHelp() {
+  const name = store.settings.shortcutName || DEFAULTS.shortcutName;
+  const sh = openSheet({ title: 'Reminders Shortcut', left: 'Done' });
+  sh.body.innerHTML = `
+    <div class="section"><div class="group"><div class="block">
+      <p style="margin:0 0 12px">You do this once. Afterwards ChargeLog hands the reminder time to this Shortcut, and it creates a real reminder in the Reminders app.</p>
+      <ol class="steps">
+        <li>Open the <b>Shortcuts</b> app and tap <b>+</b> to make a new shortcut.</li>
+        <li>Name it exactly <code>${esc(name)}</code>. Tap the name at the top, then <b>Rename</b>.</li>
+        <li>Add the action <b>Get Dates from Input</b>. Tap its input and pick <b>Shortcut Input</b>.</li>
+        <li>Add the action <b>Add New Reminder</b>. Set the reminder text to <code>Check the car (ChargeLog)</code>.</li>
+        <li>In that action, tap <b>Show More</b> (or the arrow), turn on the alert or <b>Remind Me</b>, and set its date to <b>Dates</b> from step 3.</li>
+        <li>Tap <b>Done</b>. Come back here and tap <b>Send a test reminder</b>. Allow access to Reminders when asked.</li>
+      </ol>
+      <p class="small muted" style="margin:10px 0 0">After the Shortcut runs, swipe back or tap the ChargeLog name in the top-left corner to return. To snooze, use the reminder's own options. If you end a charge early, tick the reminder off in Reminders.</p>
+    </div></div></div>`;
+}
+
+/* ---------------- Backup / export ---------------- */
+
+async function shareOrDownload(filename, text, mime) {
+  const blob = new Blob([text], { type: mime });
+  try {
+    const file = new File([blob], filename, { type: mime });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: filename });
+      return;
+    }
+  } catch (e) {
+    if (e && e.name === 'AbortError') return;
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+}
+
+function csvText() {
+  const iso = (ts) => (ts ? new Date(ts).toISOString() : '');
+  const rows = [['start', 'end', 'start_percent', 'end_percent', 'added_percent', 'kwh', 'cost_eur', 'price_per_kwh', 'vat_factor', 'loss_factor', 'battery_kwh', 'note']];
+  completedSessions().slice().reverse().forEach((s) => rows.push([
+    iso(s.start), iso(s.end), s.startPct, s.endPct ?? '', addedPct(s),
+    sEnergy(s).toFixed(2), sCost(s).toFixed(2), s.price, s.vat.toFixed(2), s.loss.toFixed(2), s.cap, `"${(s.note || '').replace(/"/g, '""')}"`,
+  ]));
+  return rows.map((r) => r.join(',')).join('\n');
+}
+
+function exportCSV() {
+  if (!completedSessions().length) { toast('No charges to export yet'); return; }
+  shareOrDownload('ChargeLog.csv', csvText(), 'text/csv');
+}
+
+function backup() {
+  const payload = { app: 'ChargeLog', version: 1, exported: new Date().toISOString(), settings: store.settings, sessions: store.sessions };
+  const d = new Date(), p = (n) => String(n).padStart(2, '0');
+  shareOrDownload(`ChargeLog-backup-${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}.json`, JSON.stringify(payload, null, 2), 'application/json');
+}
+
+function validSession(x) {
+  return x && typeof x.id === 'string' && Number.isFinite(x.start) && Number.isFinite(x.startPct)
+    && Number.isFinite(x.cap) && Number.isFinite(x.loss) && Number.isFinite(x.price) && Number.isFinite(x.vat);
+}
+
+function onRestoreFile(e) {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    let data;
+    try { data = JSON.parse(reader.result); } catch { toast('That file is not a ChargeLog backup', 'warn'); return; }
+    if (!data || data.app !== 'ChargeLog' || !Array.isArray(data.sessions)) { toast('That file is not a ChargeLog backup', 'warn'); return; }
+    const sessions = data.sessions.filter(validSession);
+    actionSheet({
+      title: `Restore ${sessions.length} charge${sessions.length === 1 ? '' : 's'}?`,
+      message: 'This replaces everything currently in ChargeLog.',
+      actions: [{ label: 'Replace with backup', destructive: true, handler: () => {
+        store.data.sessions = sessions;
+        store.data.settings = { ...DEFAULTS, ...(data.settings || {}) };
+        store.save(); render(); toast('Backup restored');
+      } }],
+    });
+  };
+  reader.readAsText(file);
+}
+
+function applyToAll() {
+  const n = store.sessions.length;
+  if (!n) { toast('No charges yet'); return; }
+  actionSheet({
+    title: 'Recalculate all past charges?',
+    message: 'Every saved charge will use the battery size, loss, price and IVA above.',
+    actions: [{ label: `Apply to ${n} charge${n === 1 ? '' : 's'}`, handler: () => {
+      const t = tariffNow();
+      store.sessions.forEach((s) => Object.assign(s, t));
+      store.save(); render(); toast('All charges recalculated');
+    } }],
+  });
+}
+
+/* ---------------- Navigation ---------------- */
+
+const SCREENS = { charge: renderCharge, history: renderHistory, stats: renderStats, settings: renderSettings };
+
+function render() {
+  document.querySelectorAll('.screen').forEach((sc) => sc.classList.toggle('active', sc.id === 'screen-' + ui.tab));
+  document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t.dataset.tab === ui.tab));
+  SCREENS[ui.tab]();
+}
+
+function setTab(tab) {
+  if (ui.tab === tab) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  ui.tab = tab;
+  window.scrollTo(0, 0);
+  render();
+}
+
+function buildTabbar() {
+  const tabs = [['charge', 'Charge', ICON.bolt], ['history', 'History', ICON.list], ['stats', 'Stats', ICON.chart], ['settings', 'Settings', ICON.sliders]];
+  const bar = document.getElementById('tabbar');
+  bar.innerHTML = tabs.map(([k, label, icon]) => `<button class="tab" data-tab="${k}">${icon}<span>${label}</span></button>`).join('');
+  bar.querySelectorAll('.tab').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tab)));
+}
+
+const ACTIONS = {
+  start: openStartSheet,
+  end: openEndSheet,
+  'edit-alarm': openAlarmSheet,
+  'active-menu': activeMenu,
+  'see-all': () => setTab('history'),
+  'export-csv': exportCSV,
+  backup,
+  restore: () => document.getElementById('restore-file').click(),
+  'apply-all': applyToAll,
+  'shortcut-help': openShortcutHelp,
+  'test-reminder': testReminder,
+  'dismiss-install': () => { store.settings.installHintDismissed = true; store.save(); render(); },
+};
+
+document.addEventListener('click', (e) => {
+  const act = e.target.closest('[data-act]');
+  if (act && ACTIONS[act.dataset.act]) { ACTIONS[act.dataset.act](); return; }
+  const del = e.target.closest('[data-del]');
+  if (del) { deleteSession(del.dataset.del); return; }
+  const edit = e.target.closest('[data-edit]');
+  if (edit) {
+    const row = edit.closest('.swipe');
+    if (row && (row.dataset.justSwiped || row.classList.contains('open'))) {
+      row.classList.remove('open'); row.querySelector('.swipe-content').style.transform = '';
+      return;
+    }
+    openEditSheet(edit.dataset.edit);
+  }
+});
+
+/* ---------------- Boot ---------------- */
+
+function boot() {
+  store.load();
+  buildTabbar();
+  render();
+  setInterval(tick, 1000);
+  setInterval(() => {
+    if (ui.tab === 'charge' && activeSession() && !document.querySelector('.sheet, .action-sheet')) renderCharge();
+  }, 30000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && !document.querySelector('.sheet, .action-sheet')) render();
+  });
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+}
+
+boot();
+
+</script>
+</body>
+</html>
